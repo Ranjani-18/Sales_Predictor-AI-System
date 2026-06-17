@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Predictor AI - Premium Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Custom Script -->
+    <script src="/static/app.js" defer></script>
+</head>
+<body>
+    <div class="glass-bg"></div>
+    <div class="app-container">
+        
+        <!-- Header -->
+        <header class="app-header">
+            <div class="brand">
+                <div class="brand-logo">
+                    <i class="fa-solid fa-chart-line-up fa-bounce logo-icon"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>Sales Predictor <span class="accent-text">AI</span></h1>
+                    <p>Machine Learning Forecasting Dashboard</p>
+                </div>
+            </div>
+            <div class="system-status">
+                <span id="status-indicator" class="status-dot offline"></span>
+                <span id="status-text" class="status-label">Checking System Connection...</span>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Grid -->
+        <main class="dashboard-grid">
+            
+            <!-- Left Side: Data & Training -->
+            <div class="grid-column">
+                
+                <!-- Section: Dataset Management -->
+                <section class="dashboard-card" id="dataset-section">
+                    <div class="card-header">
+                        <i class="fa-solid fa-database card-icon"></i>
+                        <h2>Dataset Management</h2>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="upload-area" id="drop-zone">
+                            <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                            <p class="upload-title">Drag & drop dataset sales.csv here</p>
+                            <p class="upload-subtitle">or click to browse local files</p>
+                            <input type="file" id="file-input" accept=".csv" style="display: none;">
+                        </div>
+                        
+                        <div class="or-separator">
+                            <span>OR</span>
+                        </div>
+                        
+                        <button id="btn-generate-mock" class="btn btn-secondary">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Sample Dataset
+                        </button>
+                        
+                        <!-- Dataset Status / Summary -->
+                        <div id="dataset-summary" class="info-block hidden">
+                            <h3><i class="fa-solid fa-circle-info"></i> Dataset Summary</h3>
+                            <div class="stats-grid-mini">
+                                <div class="stat-mini-card">
+                                    <span class="stat-lbl">Records</span>
+                                    <span class="stat-val" id="summary-records">-</span>
+                                </div>
+                                <div class="stat-mini-card">
+                                    <span class="stat-lbl">Stores</span>
+                                    <span class="stat-val" id="summary-stores">-</span>
+                                </div>
+                                <div class="stat-mini-card">
+                                    <span class="stat-lbl">Avg Sales</span>
+                                    <span class="stat-val" id="summary-avg-sales">-</span>
+                                </div>
+                            </div>
+                            <p class="summary-details">Date Range: <strong id="summary-range">-</strong></p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section: Model Training -->
+                <section class="dashboard-card" id="training-section">
+                    <div class="card-header">
+                        <i class="fa-solid fa-brain-circuit card-icon"></i>
+                        <h2>Model Training</h2>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="training-controls">
+                            <button id="btn-train" class="btn btn-primary" disabled>
+                                <i class="fa-solid fa-gear"></i> Train ML Predictor
+                            </button>
+                            <div id="training-loader" class="loader hidden">
+                                <div class="spinner"></div>
+                                <span>Fitting Random Forest model...</span>
+                            </div>
+                        </div>
+
+                        <!-- Model Metrics (Hidden initially) -->
+                        <div id="model-metrics" class="info-block hidden">
+                            <h3><i class="fa-solid fa-gauge-high"></i> Evaluation Metrics</h3>
+                            <div class="metrics-grid">
+                                <div class="metric-card">
+                                    <span class="metric-val" id="metric-r2">-</span>
+                                    <span class="metric-lbl">R² Score (Accuracy)</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-val" id="metric-mape">-</span>
+                                    <span class="metric-lbl">MAPE (%)</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-val" id="metric-mae">-</span>
+                                    <span class="metric-lbl">MAE (Units)</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-val" id="metric-rmse">-</span>
+                                    <span class="metric-lbl">RMSE</span>
+                                </div>
+                            </div>
+                            <div class="model-meta">
+                                <p>Trained Date: <span id="meta-date">-</span></p>
+                                <p>Training Set: <span id="meta-size">-</span> samples</p>
+                            </div>
+                            
+                            <!-- Feature Importances Chart -->
+                            <div class="chart-container">
+                                <h4>Top 5 Predictive Features</h4>
+                                <canvas id="importanceChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div id="no-model-warning" class="warning-placeholder">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <p>Please upload data or generate sample data to unlock model training.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Side: Predictions -->
+            <div class="grid-column">
+                
+                <!-- Section: Predictions Form -->
+                <section class="dashboard-card" id="prediction-section">
+                    <div class="card-header">
+                        <i class="fa-solid fa-calculator card-icon"></i>
+                        <h2>Forecast Calculator</h2>
+                    </div>
+                    
+                    <div class="card-body">
+                        <form id="prediction-form" class="form-grid">
+                            
+                            <!-- Date Input -->
+                            <div class="form-group">
+                                <label for="input-date"><i class="fa-regular fa-calendar"></i> Target Date</label>
+                                <input type="date" id="input-date" required>
+                            </div>
+                            
+                            <!-- Store ID -->
+                            <div class="form-group">
+                                <label for="input-store"><i class="fa-solid fa-store"></i> Store Identifier</label>
+                                <select id="input-store" required>
+                                    <option value="1">Store #1 (High Performing)</option>
+                                    <option value="2">Store #2 (Low Performing)</option>
+                                    <option value="3">Store #3 (Baseline)</option>
+                                </select>
+                            </div>
+
+                            <!-- Product Category -->
+                            <div class="form-group">
+                                <label for="input-category"><i class="fa-solid fa-tags"></i> Product Category</label>
+                                <select id="input-category" required>
+                                    <option value="Electronics">Electronics</option>
+                                    <option value="Apparel">Apparel</option>
+                                    <option value="Home">Home</option>
+                                    <option value="Beauty">Beauty</option>
+                                    <option value="Sports">Sports</option>
+                                </select>
+                            </div>
+
+                            <!-- Unit Price Slider -->
+                            <div class="form-group price-group">
+                                <div class="label-row">
+                                    <label for="input-price"><i class="fa-solid fa-dollar-sign"></i> Unit Price</label>
+                                    <span class="price-value" id="price-display">$150.00</span>
+                                </div>
+                                <input type="range" id="input-price" min="5" max="1000" step="5" value="150">
+                            </div>
+
+                            <!-- Toggle Flags -->
+                            <div class="toggle-row">
+                                <div class="form-toggle">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="input-promo">
+                                        <span class="slider-toggle"></span>
+                                    </label>
+                                    <span class="toggle-label"><i class="fa-solid fa-percentage"></i> Active Promo</span>
+                                </div>
+
+                                <div class="form-toggle">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="input-holiday">
+                                        <span class="slider-toggle"></span>
+                                    </label>
+                                    <span class="toggle-label"><i class="fa-solid fa-calendar-star"></i> Public Holiday</span>
+                                </div>
+                            </div>
+
+                            <!-- Predict Button -->
+                            <button type="submit" id="btn-predict" class="btn btn-primary btn-glow" disabled>
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Predict Expected Sales
+                            </button>
+                        </form>
+
+                        <!-- Prediction Output display -->
+                        <div id="prediction-result" class="prediction-output-card hidden">
+                            <div class="output-wrapper">
+                                <span class="output-lbl">Predicted Unit Sales</span>
+                                <div class="output-digits-glow">
+                                    <span id="predicted-value">0</span>
+                                    <span class="units-lbl">units</span>
+                                </div>
+                                <div class="prediction-insight" id="prediction-insight-msg">
+                                    <i class="fa-solid fa-lightbulb text-accent"></i>
+                                    <span>Calculated using random forest regression.</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="no-prediction-warning" class="warning-placeholder">
+                            <i class="fa-solid fa-lock"></i>
+                            <p>Prediction module is locked. Generate data and train the machine learning model first.</p>
+                        </div>
+
+                    </div>
+                </section>
+            </div>
+
+        </main>
+        
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>Designed with ❤️ for Sales Predictor AI System | Powered by FastAPI, Random Forest Regression & Vanilla Web Components.</p>
+        </footer>
+    </div>
+</body>
+</html>
